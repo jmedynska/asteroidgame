@@ -185,7 +185,7 @@ while not game_over:
         asteroids.remove(a)
     if not asteroids:
         level += 1
-        level_text = font1.render("Level "+ str(level), True, (255,255,255))
+        level_text = font2.render("Level "+ str(level), True, (255,255,255))
         screen.blit(background,[0,0])
         screen.blit(level_text, text_positioning(screen,level_text))
         pygame.display.update()
