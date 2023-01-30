@@ -126,6 +126,7 @@ font1 = pygame.font.SysFont('Arial', 30, True, False)
 font2 = pygame.font.Font('asteroidgame/fonts/Lazer.ttf', 80)
 game_over_text = font2.render("Game Over", True, (255,255,255))
 win_text = font2.render('You WON!', True, (255,255,255))
+continue_text = font1.render("Press 'R' to restart", True, (255,255,255))
 
 clock = pygame.time.Clock()
 
@@ -134,10 +135,21 @@ while not game_over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_over = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r and ship is None:
+                level = 1
+                score = 0
+                lifes = 3
+                add_asteroids(1)
+                ship = Ship((screen.get_width()//2, screen.get_height()//2))
+                pygame.display.update()
     #images are displayed in the order from bottom to top of the screen
     screen.blit(background,[0,0])  #display the background image on the bottom
     if ship is None:
         screen.blit(game_over_text, text_positioning(screen,game_over_text))
+        screen.blit(continue_text,[(screen.get_width() - continue_text.get_width())//2, (screen.get_height()- continue_text.get_height())//2 + game_over_text.get_height()])
+        for a in asteroids:
+            asteroids.remove(a)
         pygame.display.update()
         continue
     ship.update()
@@ -190,7 +202,7 @@ while not game_over:
         screen.blit(level_text, text_positioning(screen,level_text))
         pygame.display.update()
         pygame.time.delay(3500)
-        add_asteroids(level+1)
+        add_asteroids(level)
         ship = Ship((screen.get_width()//2, screen.get_height()//2))
         continue
     pygame.display.update()
