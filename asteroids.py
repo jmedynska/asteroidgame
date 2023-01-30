@@ -5,7 +5,11 @@ from pygame import Vector2
 from pygame.transform import rotozoom
 from pygame.mixer import Sound
 
-
+#TO DO
+#speed extra sign to collect
+#slow playtime sign to collect
+#changing the background in further levels
+#invisibility coat
 
 asteroid_images = ['asteroidgame/images/asteroid1.png', 'asteroidgame/images/asteroid2.png', 'asteroidgame/images/asteroid3.png']
 
@@ -105,15 +109,38 @@ class Asteroid:
         else:
             return False
 
+class Heart:
+    def __init__(self, position, heart_image):
+        self.position = Vector2(position)
+        self.image = heart_image
+        self.velocity = Vector2(random.randint(-2,2), random.randint(0,2))
+        self.radius = self.image.get_width() 
+
+    def update(self):
+        self.position += self.velocity
+    
+    def draw(self, screen):
+        screen.blit(self.image,self.position)
+    
+    def collect(self, position):
+        if self.position.distance_to(position) <= self.radius:
+            return True
+        else:
+            return False
 
 
 pygame.init()
 screen = pygame.display.set_mode((800,800))
 pygame.display.set_caption("Asteroids")
 background = pygame.image.load('asteroidgame/images/space.png')
+heart_img = pygame.image.load('asteroidgame/images/heart.png')
+heart_img = pygame.transform.scale_by(heart_img, 0.05)
+heart_for_level = 1
 game_over = False
 ship = Ship((screen.get_width()//2, screen.get_height()//2))
 asteroids = []
+hearts = []
+heart_show = random.randint(10,1000)
 out_of_bounds = [-150, -150, 950, 950]
 level = 1
 add_asteroids(level)
@@ -145,7 +172,7 @@ while not game_over:
                 pygame.display.update()
     #images are displayed in the order from bottom to top of the screen
     screen.blit(background,[0,0])  #display the background image on the bottom
-
+    
     if ship is None:  #end of the game 
         screen.blit(game_over_text, text_positioning(screen,game_over_text))
         screen.blit(continue_text,[(screen.get_width() - continue_text.get_width())//2, (screen.get_height()- continue_text.get_height())//2 + game_over_text.get_height()])
@@ -174,7 +201,8 @@ while not game_over:
 
     dead_bullets = []
     dead_asteroids = []
-    
+    dead_hearts = []
+
     #shooting the asteroids
     for b in ship.bullets:
         b.update()
@@ -191,13 +219,38 @@ while not game_over:
                         dead_asteroids.append(a)
                         score += 1
 
+    heart_show -= clock.get_time()
+
+    if heart_show < 0 and not hearts and heart_for_level > 0:
+        heart_for_level -= 1
+        heart_show = random.randint(1000,100000)
+        hearts.append(Heart((random.randint(0,screen.get_width()-heart_img.get_width()),10), heart_img))
+    
+    for h in hearts:
+        h.update()
+        h.draw(screen)
+        if h.position.x < out_of_bounds[0] or h.position.x > out_of_bounds[2] or \
+            h.position.y < out_of_bounds[1] or h.position.y > out_of_bounds[3] and not dead_hearts.__contains__(h):
+            dead_hearts.append(h)
+    
+        if h.collect(ship.position):
+            if not dead_hearts.__contains__(h):
+                dead_hearts.append(h)
+                if lifes < 4: #max 4 lifes
+                    lifes += 1
+                break
+
     #score and lifes displaying
     score_text = font1.render('Score: ' + str(score),True, (255,255,255))
     lifes_text = font1.render(str(lifes),True, (255,255,255))
     screen.blit(score_text,[5,0])
     #screen.blit(lifes_text,[screen.get_width()- lifes_text.get_width()*2,0])
+
     for i in range(lifes):
         screen.blit(life_image,[screen.get_width()-(i+1)*life_image.get_width(),0])
+
+    for h in dead_hearts:
+        hearts.remove(h)
 
     for b in dead_bullets:
         ship.bullets.remove(b)
@@ -210,7 +263,10 @@ while not game_over:
 
     #next level  
     if not asteroids:
+        for h in hearts:
+            hearts.remove(h)
         level += 1
+        heart_for_level = level
         level_text = font2.render("Level "+ str(level), True, (255,255,255))
         screen.blit(background,[0,0])
         screen.blit(level_text, text_positioning(screen,level_text))
