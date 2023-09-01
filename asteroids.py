@@ -2,6 +2,7 @@ import pygame
 import random
 from pygame.locals import *
 from pygame import Vector2
+from pygame import mixer 
 from pygame.transform import rotozoom
 from pygame.mixer import Sound
 
@@ -10,6 +11,9 @@ from pygame.mixer import Sound
 #slow playtime sign to collect
 #changing the background in further levels
 #invisibility coat
+#high score
+#table of players and scores
+#background music
 
 asteroid_images = ['asteroidgame/images/asteroid1.png', 'asteroidgame/images/asteroid2.png', 'asteroidgame/images/asteroid3.png']
 
@@ -146,6 +150,9 @@ level = 1
 add_asteroids(level)
 score = 0
 lifes = 3
+mixer.init()
+mixer.music.load("asteroidgame/sounds/game-music.ogg")
+mixer.music.play(loops=-1)
 ship_image = pygame.image.load('asteroidgame/images/ship.png')
 life_image = pygame.transform.scale(ship_image,(32,32)) #Resizing object
 font1 = pygame.font.SysFont('Arial', 30, True, False)
