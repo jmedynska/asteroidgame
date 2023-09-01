@@ -1,0 +1,6 @@
+version: '3'
+services:
+  game-app:
+    build: .
+    ports:
+      - 8081:8081
